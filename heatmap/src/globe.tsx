@@ -1,8 +1,309 @@
 import React, { useEffect, useState } from 'react';
 import NavigationBar from './navigation-bar';
-import { DisasterRiskGeojson, loadWildfireData, loadFloodData, loadHurricaneData } from './disaster-data';
+import { FeatureCollection, Point } from 'geojson';
+
+export type DisasterRiskProps = {
+  id: string;
+  probability: number; // 0-1 probability value
+  riskType: 'wildfire' | 'drought';
+  lastAssessment: number; // timestamp
+};
+
+export type DisasterRiskGeojson = FeatureCollection<Point, DisasterRiskProps>;
 
 const API_KEY = globalThis.GOOGLE_MAPS_API_KEY ?? (process.env.GOOGLE_MAPS_API_KEY as string);
+
+// Generate grid-based risk data around specific hotspots
+const generateRiskGrid = (
+  centerLat: number,
+  centerLng: number,
+  gridSize: number,
+  spacing: number,
+  riskType: 'wildfire' | 'drought',
+  baseRisk: number = 0.5
+): DisasterRiskProps[] => {
+  const points: DisasterRiskProps[] = [];
+  const halfGrid = Math.floor(gridSize / 2);
+  
+  for (let i = -halfGrid; i <= halfGrid; i++) {
+    for (let j = -halfGrid; j <= halfGrid; j++) {
+      const lat = centerLat + (i * spacing);
+      const lng = centerLng + (j * spacing);
+      
+      // Distance from center affects probability
+      const distance = Math.sqrt(i * i + j * j);
+      const maxDistance = halfGrid * Math.sqrt(2);
+      const distanceFactor = 1 - (distance / maxDistance);
+      
+      // Add some randomness while maintaining center-high pattern
+      const randomFactor = 0.3 + (Math.random() * 0.4); // 0.3 to 0.7
+      const probability = Math.max(0.05, Math.min(0.95, 
+        baseRisk * distanceFactor * randomFactor + (Math.random() * 0.2 - 0.1)
+      ));
+      
+      points.push({
+        id: `${riskType}_${lat.toFixed(4)}_${lng.toFixed(4)}`,
+        probability: parseFloat(probability.toFixed(3)),
+        riskType,
+        lastAssessment: Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000 // Random time in last 30 days
+      });
+    }
+  }
+  
+  return points;
+};
+
+// Generate realistic wildfire risk data (focused on known fire-prone land regions only)
+const generateWildfireData = (): DisasterRiskGeojson => {
+  const wildfirePoints: DisasterRiskProps[] = [];
+  
+  // California inland areas (avoiding coastal waters)
+  const californiaPoints = [
+    { lat: 34.0522, lng: -118.2437, risk: 0.8 }, // LA inland
+    { lat: 34.2, lng: -118.5, risk: 0.75 },
+    { lat: 34.4, lng: -118.1, risk: 0.7 },
+    { lat: 37.7749, lng: -122.4194, risk: 0.85 }, // Bay Area inland
+    { lat: 37.9, lng: -122.2, risk: 0.8 },
+    { lat: 37.6, lng: -122.1, risk: 0.75 },
+    { lat: 38.5816, lng: -121.4944, risk: 0.9 }, // Sacramento Valley
+    { lat: 38.8, lng: -121.2, risk: 0.85 },
+    { lat: 39.0, lng: -121.0, risk: 0.8 },
+    { lat: 36.7783, lng: -119.4179, risk: 0.7 }, // Central Valley inland
+    { lat: 36.5, lng: -119.2, risk: 0.75 },
+    { lat: 37.0, lng: -119.6, risk: 0.8 },
+  ];
+
+  // Pacific Northwest inland areas
+  const pacificNWPoints = [
+    { lat: 45.5152, lng: -122.6784, risk: 0.65 }, // Portland area
+    { lat: 45.7, lng: -122.4, risk: 0.6 },
+    { lat: 45.3, lng: -122.3, risk: 0.7 },
+    { lat: 47.6062, lng: -122.3321, risk: 0.6 }, // Seattle area inland
+    { lat: 47.4, lng: -121.8, risk: 0.65 },
+    { lat: 47.8, lng: -121.5, risk: 0.7 },
+  ];
+
+  // Southwest US desert areas
+  const southwestPoints = [
+    { lat: 33.4484, lng: -112.0740, risk: 0.8 }, // Phoenix
+    { lat: 33.6, lng: -111.8, risk: 0.75 },
+    { lat: 33.2, lng: -112.3, risk: 0.7 },
+    { lat: 35.6870, lng: -105.9378, risk: 0.7 }, // Santa Fe
+    { lat: 35.9, lng: -105.7, risk: 0.65 },
+    { lat: 35.4, lng: -106.1, risk: 0.75 },
+    { lat: 39.5501, lng: -105.7821, risk: 0.75 }, // Colorado Rockies
+    { lat: 39.8, lng: -105.5, risk: 0.7 },
+    { lat: 39.3, lng: -106.0, risk: 0.8 },
+  ];
+
+  // Australia inland areas (avoiding coasts)
+  const australiaPoints = [
+    { lat: -33.6, lng: 150.8, risk: 0.8 }, // Sydney inland
+    { lat: -33.4, lng: 150.6, risk: 0.75 },
+    { lat: -33.8, lng: 150.9, risk: 0.7 },
+    { lat: -37.6, lng: 144.6, risk: 0.7 }, // Melbourne inland
+    { lat: -37.4, lng: 144.4, risk: 0.75 },
+    { lat: -37.8, lng: 144.8, risk: 0.65 },
+    { lat: -31.7, lng: 115.6, risk: 0.75 }, // Perth inland
+    { lat: -31.5, lng: 115.4, risk: 0.7 },
+    { lat: -31.9, lng: 115.8, risk: 0.8 },
+  ];
+
+  // Mediterranean Europe inland areas
+  const mediterraneanPoints = [
+    { lat: 40.4168, lng: -3.7038, risk: 0.6 }, // Madrid
+    { lat: 40.6, lng: -3.5, risk: 0.55 },
+    { lat: 40.2, lng: -3.9, risk: 0.65 },
+    { lat: 37.9838, lng: 23.7275, risk: 0.65 }, // Athens
+    { lat: 38.1, lng: 23.5, risk: 0.6 },
+    { lat: 37.8, lng: 23.9, risk: 0.7 },
+    { lat: 43.2965, lng: 5.3698, risk: 0.55 }, // Provence
+    { lat: 43.5, lng: 5.1, risk: 0.5 },
+    { lat: 43.0, lng: 5.6, risk: 0.6 },
+  ];
+
+  // Combine all points and add some variation
+  const allPoints = [...californiaPoints, ...pacificNWPoints, ...southwestPoints, ...australiaPoints, ...mediterraneanPoints];
+  
+  allPoints.forEach((point, index) => {
+    // Add some nearby points with variation
+    for (let i = 0; i < 8; i++) {
+      const latOffset = (Math.random() - 0.5) * 0.3; // ±0.15 degrees
+      const lngOffset = (Math.random() - 0.5) * 0.3;
+      const riskVariation = (Math.random() - 0.5) * 0.2; // ±0.1 risk variation
+      
+      const newLat = point.lat + latOffset;
+      const newLng = point.lng + lngOffset;
+      const newRisk = Math.max(0.1, Math.min(0.95, point.risk + riskVariation));
+      
+      wildfirePoints.push({
+        id: `wildfire_${newLat.toFixed(4)}_${newLng.toFixed(4)}`,
+        probability: parseFloat(newRisk.toFixed(3)),
+        riskType: 'wildfire',
+        lastAssessment: Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000
+      });
+    }
+  });
+
+  return {
+    type: 'FeatureCollection',
+    features: wildfirePoints.map(point => {
+      const parts = point.id.split('_');
+      const lat = parseFloat(parts[1]);
+      const lng = parseFloat(parts[2]);
+      
+      return {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [lng, lat]
+        },
+        properties: point
+      };
+    })
+  };
+};
+
+// Generate realistic drought risk data (focused on arid/semi-arid land regions only)
+const generateDroughtData = (): DisasterRiskGeojson => {
+  const droughtPoints: DisasterRiskProps[] = [];
+  
+  // California Central Valley and inland desert areas
+  const californiaPoints = [
+    { lat: 36.7783, lng: -119.4179, risk: 0.85 }, // Central Valley
+    { lat: 36.5, lng: -119.2, risk: 0.8 },
+    { lat: 37.0, lng: -119.6, risk: 0.9 },
+    { lat: 33.9425, lng: -117.2297, risk: 0.8 }, // Riverside inland
+    { lat: 33.7, lng: -117.0, risk: 0.75 },
+    { lat: 34.1, lng: -117.4, risk: 0.85 },
+    { lat: 32.8, lng: -117.0, risk: 0.75 }, // San Diego inland
+    { lat: 32.6, lng: -116.8, risk: 0.7 },
+    { lat: 33.0, lng: -117.2, risk: 0.8 },
+  ];
+
+  // Southwest US desert regions
+  const southwestPoints = [
+    { lat: 33.4484, lng: -112.0740, risk: 0.9 }, // Phoenix/Arizona
+    { lat: 33.6, lng: -111.8, risk: 0.85 },
+    { lat: 33.2, lng: -112.3, risk: 0.95 },
+    { lat: 35.0853, lng: -106.6056, risk: 0.85 }, // Albuquerque
+    { lat: 35.3, lng: -106.4, risk: 0.8 },
+    { lat: 34.8, lng: -106.8, risk: 0.9 },
+    { lat: 31.7619, lng: -106.4850, risk: 0.8 }, // El Paso area
+    { lat: 31.5, lng: -106.2, risk: 0.75 },
+    { lat: 31.9, lng: -106.7, risk: 0.85 },
+    { lat: 36.2, lng: -115.0, risk: 0.95 }, // Las Vegas inland
+    { lat: 36.0, lng: -114.8, risk: 0.9 },
+    { lat: 36.4, lng: -115.2, risk: 0.85 },
+  ];
+
+  // Great Plains (Dust Bowl region)
+  const greatPlainsPoints = [
+    { lat: 39.7391, lng: -104.9847, risk: 0.75 }, // Eastern Colorado
+    { lat: 39.5, lng: -104.7, risk: 0.7 },
+    { lat: 39.9, lng: -105.2, risk: 0.8 },
+    { lat: 37.6872, lng: -97.3301, risk: 0.8 }, // Kansas
+    { lat: 37.4, lng: -97.1, risk: 0.75 },
+    { lat: 37.9, lng: -97.5, risk: 0.85 },
+    { lat: 35.4676, lng: -97.5164, risk: 0.75 }, // Oklahoma
+    { lat: 35.2, lng: -97.3, risk: 0.7 },
+    { lat: 35.7, lng: -97.7, risk: 0.8 },
+  ];
+
+  // Australia's interior (far from coasts)
+  const australiaPoints = [
+    { lat: -30.7333, lng: 121.5000, risk: 0.9 }, // Western Australia interior
+    { lat: -30.5, lng: 121.3, risk: 0.85 },
+    { lat: -30.9, lng: 121.7, risk: 0.95 },
+    { lat: -28.0167, lng: 153.0, risk: 0.85 }, // Queensland interior
+    { lat: -27.8, lng: 152.8, risk: 0.8 },
+    { lat: -28.2, lng: 153.2, risk: 0.9 },
+    { lat: -32.5000, lng: 147.0000, risk: 0.8 }, // NSW interior
+    { lat: -32.3, lng: 146.8, risk: 0.75 },
+    { lat: -32.7, lng: 147.2, risk: 0.85 },
+  ];
+
+  // Southern Africa interior
+  const africaPoints = [
+    { lat: -25.7479, lng: 28.2293, risk: 0.85 }, // South Africa interior
+    { lat: -25.5, lng: 28.0, risk: 0.8 },
+    { lat: -25.9, lng: 28.4, risk: 0.9 },
+    { lat: -22.9576, lng: 18.4904, risk: 0.8 }, // Namibia
+    { lat: -22.7, lng: 18.2, risk: 0.75 },
+    { lat: -23.1, lng: 18.7, risk: 0.85 },
+  ];
+
+  // Mediterranean interior (away from coasts)
+  const mediterraneanPoints = [
+    { lat: 40.4637, lng: -3.7492, risk: 0.65 }, // Central Spain
+    { lat: 40.2, lng: -3.5, risk: 0.6 },
+    { lat: 40.7, lng: -3.9, risk: 0.7 },
+    { lat: 37.9755, lng: 23.7348, risk: 0.7 }, // Greece interior
+    { lat: 37.7, lng: 23.5, risk: 0.65 },
+    { lat: 38.1, lng: 23.9, risk: 0.75 },
+    { lat: 36.7378, lng: 3.0867, risk: 0.75 }, // Algeria
+    { lat: 36.5, lng: 2.8, risk: 0.7 },
+    { lat: 36.9, lng: 3.3, risk: 0.8 },
+  ];
+
+  // Combine all points and add variation
+  const allPoints = [...californiaPoints, ...southwestPoints, ...greatPlainsPoints, ...australiaPoints, ...africaPoints, ...mediterraneanPoints];
+  
+  allPoints.forEach((point, index) => {
+    // Add some nearby points with variation
+    for (let i = 0; i < 6; i++) {
+      const latOffset = (Math.random() - 0.5) * 0.4; // ±0.2 degrees
+      const lngOffset = (Math.random() - 0.5) * 0.4;
+      const riskVariation = (Math.random() - 0.5) * 0.15; // ±0.075 risk variation
+      
+      const newLat = point.lat + latOffset;
+      const newLng = point.lng + lngOffset;
+      const newRisk = Math.max(0.1, Math.min(0.95, point.risk + riskVariation));
+      
+      droughtPoints.push({
+        id: `drought_${newLat.toFixed(4)}_${newLng.toFixed(4)}`,
+        probability: parseFloat(newRisk.toFixed(3)),
+        riskType: 'drought',
+        lastAssessment: Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000
+      });
+    }
+  });
+
+  return {
+    type: 'FeatureCollection',
+    features: droughtPoints.map(point => {
+      const parts = point.id.split('_');
+      const lat = parseFloat(parts[1]);
+      const lng = parseFloat(parts[2]);
+      
+      return {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [lng, lat]
+        },
+        properties: point
+      };
+    })
+  };
+};
+
+// Main data loading functions
+const loadWildfireData = (): Promise<DisasterRiskGeojson> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(generateWildfireData());
+    }, 300); // Simulate API call delay
+  });
+};
+
+const loadDroughtData = (): Promise<DisasterRiskGeojson> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(generateDroughtData());
+    }, 300);
+  });
+};
 
 // Load Google Maps API with 3D support
 const loadGoogleMaps = () => {
@@ -34,20 +335,13 @@ const getProbabilityColor = (probability: number, disasterType: string): string 
     if (p >= 0.4) return '#FF4500'; // Orange-red
     if (p >= 0.2) return '#FF8C00'; // Orange
     return '#FFD700'; // Gold
-  } else if (disasterType === 'flood') {
-    // Blue gradient for floods
-    if (p >= 0.8) return '#000080'; // Dark blue
-    if (p >= 0.6) return '#0000FF'; // Blue
-    if (p >= 0.4) return '#4169E1'; // Royal blue
-    if (p >= 0.2) return '#87CEEB'; // Sky blue
-    return '#ADD8E6'; // Light blue
-  } else if (disasterType === 'hurricane') {
-    // Purple/pink gradient for hurricanes
-    if (p >= 0.8) return '#8B008B'; // Dark magenta
-    if (p >= 0.6) return '#FF1493'; // Deep pink
-    if (p >= 0.4) return '#FF69B4'; // Hot pink
-    if (p >= 0.2) return '#FFA500'; // Orange
-    return '#FFD700'; // Gold
+  } else if (disasterType === 'drought') {
+    // Brown gradient for drought
+    if (p >= 0.8) return '#8B4513'; // Saddle brown
+    if (p >= 0.6) return '#A0522D'; // Sienna
+    if (p >= 0.4) return '#CD853F'; // Peru
+    if (p >= 0.2) return '#DEB887'; // Burlywood
+    return '#F5DEB3'; // Wheat
   }
   
   return '#808080'; // Gray fallback
@@ -300,21 +594,13 @@ const DisasterKey: React.FC<{ disasterType: string }> = ({ disasterType }) => {
         { range: '20-40%', color: '#FF8C00', label: 'Low' },
         { range: '0-20%', color: '#FFD700', label: 'Very Low' },
       ];
-    } else if (disasterType === 'flood') {
+    } else if (disasterType === 'drought') {
       return [
-        { range: '80-100%', color: '#000080', label: 'Very High' },
-        { range: '60-80%', color: '#0000FF', label: 'High' },
-        { range: '40-60%', color: '#4169E1', label: 'Moderate' },
-        { range: '20-40%', color: '#87CEEB', label: 'Low' },
-        { range: '0-20%', color: '#ADD8E6', label: 'Very Low' },
-      ];
-    } else if (disasterType === 'hurricane') {
-      return [
-        { range: '80-100%', color: '#8B008B', label: 'Very High' },
-        { range: '60-80%', color: '#FF1493', label: 'High' },
-        { range: '40-60%', color: '#FF69B4', label: 'Moderate' },
-        { range: '20-40%', color: '#FFA500', label: 'Low' },
-        { range: '0-20%', color: '#FFD700', label: 'Very Low' },
+        { range: '80-100%', color: '#8B4513', label: 'Very High' },
+        { range: '60-80%', color: '#A0522D', label: 'High' },
+        { range: '40-60%', color: '#CD853F', label: 'Moderate' },
+        { range: '20-40%', color: '#DEB887', label: 'Low' },
+        { range: '0-20%', color: '#F5DEB3', label: 'Very Low' },
       ];
     }
     return [];
@@ -385,7 +671,7 @@ const GlobePage = () => {
   const [disasterData, setDisasterData] = useState<DisasterRiskGeojson>();
   const [use3D, setUse3D] = useState(true);
   const [selectedDisaster, setSelectedDisaster] = useState<any>(null);
-  const [disasterType, setDisasterType] = useState<'wildfire' | 'flood' | 'hurricane'>('wildfire');
+  const [disasterType, setDisasterType] = useState<'wildfire' | 'drought'>('wildfire');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -397,11 +683,8 @@ const GlobePage = () => {
           case 'wildfire':
             data = await loadWildfireData();
             break;
-          case 'flood':
-            data = await loadFloodData();
-            break;
-          case 'hurricane':
-            data = await loadHurricaneData();
+          case 'drought':
+            data = await loadDroughtData();
             break;
         }
         setDisasterData(data);
@@ -446,7 +729,7 @@ const GlobePage = () => {
         }}>
           <select
             value={disasterType}
-            onChange={(e) => setDisasterType(e.target.value as 'wildfire' | 'flood' | 'hurricane')}
+            onChange={(e) => setDisasterType(e.target.value as 'wildfire' | 'drought')}
             style={{
               background: 'transparent',
               border: 'none',
@@ -459,8 +742,7 @@ const GlobePage = () => {
             }}
           >
             <option value="wildfire">Wildfires</option>
-            <option value="flood">Floods</option>
-            <option value="hurricane">Hurricanes</option>
+            <option value="drought">Droughts</option>
           </select>
         </div>
 

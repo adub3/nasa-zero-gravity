@@ -68,7 +68,7 @@ const AboutPage = () => {
             color: '#333',
             marginBottom: '1rem'
           }}>
-            About Us
+            About Our Team
           </h1>
           <p style={{
             fontSize: '1.2rem',
@@ -76,7 +76,7 @@ const AboutPage = () => {
             maxWidth: '800px',
             margin: '0 auto'
           }}>
-            We're a dedicated team of researchers and developers committed to making earthquake risk data accessible and actionable for communities worldwide.
+            We're a team of UNC students who developed this natural disaster risk visualization platform for the CDC Hackathon, combining NASA weather data with machine learning to help communities prepare for climate-related disasters.
           </p>
         </header>
 
@@ -90,7 +90,7 @@ const AboutPage = () => {
           marginBottom: '4rem',
           textAlign: 'center'
         }}>
-          <h2 style={{ color: '#d32f2f', marginBottom: '2rem', fontSize: '2.5rem' }}>Our Mission</h2>
+          <h2 style={{ color: '#d32f2f', marginBottom: '2rem', fontSize: '2.5rem' }}>CDC Hackathon at UNC</h2>
           <p style={{ 
             color: '#555', 
             fontSize: '1.3rem', 
@@ -98,9 +98,10 @@ const AboutPage = () => {
             maxWidth: '800px',
             margin: '0 auto'
           }}>
-            To democratize access to earthquake risk information through innovative data visualization, 
-            empowering individuals, communities, and organizations to make informed decisions about 
-            seismic preparedness and risk mitigation.
+            This project was created during the CDC Hackathon held at the University of North Carolina. 
+            Our goal was to leverage NASA's satellite weather data to create an accessible, real-time disaster 
+            risk visualization tool that can help communities and public health officials make informed decisions 
+            about natural disaster preparedness and response.
           </p>
         </div>
 
@@ -123,14 +124,14 @@ const AboutPage = () => {
             
             <TeamMember 
               name="Andrew Wang"
-              role="Lead Seismologist"
-              bio="Ph.D. in Geophysics from Stanford University. 15+ years experience in earthquake hazard assessment and risk modeling. Previously worked with USGS Earthquake Hazards Program."
+              role="Predictive Modeling & Data Science"
+              bio="UNC Statistics student. Andrew developed the core risk prediction models that analyze NASA satellite data to forecast disaster probabilities using neural networks and statistical modeling techniques."
             />
             
             <TeamMember 
               name="Nicholas Copland"
-              role="Full Stack Developer"
-              bio="Expert in React, TypeScript, and geospatial data visualization. Specialized in creating intuitive interfaces for complex scientific data. Former lead developer at several GIS companies."
+              role="Frontend Developer & UI/UX"
+              bio="UNC Statistics student with expertise in React and modern web technologies. Nicholas designed and built the entire user interface, creating the interactive 3D globe visualization and mapping the data over it."
             />
 
           </div>
@@ -142,14 +143,14 @@ const AboutPage = () => {
           }}>
             <TeamMember 
               name="Nishil Patel"
-              role="Data Scientist"
-              bio="Ph.D. in Applied Mathematics with focus on statistical modeling and machine learning. Develops algorithms for processing and analyzing large-scale seismic datasets."
+              role="Full Stack Developer & Systems Architecture"
+              bio="UNC Statistics student. Nishil worked on backend data cleaning and the backend to frontend pipeline."
             />
             
             <TeamMember 
               name="Tal Lucas"
-              role="UX/UI Designer"
-              bio="M.F.A. in Interactive Design from Art Center College. Specializes in data visualization and user experience design for scientific applications. Previously designed interfaces for NASA's Earth Science Division."
+              role="Data Analytics & Backend Engineering"
+              bio="UNC Physics student. Tal developed the data processing infrastructure that ingests and analyzes massive NASA weather datasets, implementing algorithms to indentify and extract meaningful risk indicators from satellite imagery."
             />
           </div>
         </div>
@@ -169,15 +170,15 @@ const AboutPage = () => {
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
             border: '1px solid rgba(255, 255, 255, 0.2)'
           }}>
-            <h3 style={{ color: '#d32f2f', marginBottom: '1.5rem', fontSize: '1.5rem' }}>Our Story</h3>
+            <h3 style={{ color: '#d32f2f', marginBottom: '1.5rem', fontSize: '1.5rem' }}>Our Challenge</h3>
             <p style={{ color: '#555', marginBottom: '1rem' }}>
-              Founded in 2023, our project began when our team recognized the gap between complex 
-              seismic research data and public understanding. We saw communities making critical 
-              decisions about where to live and work without access to clear, visual earthquake risk information.
+              The CDC Hackathon challenged us to create innovative solutions for natural disaster preparedness. 
+              We recognized that wildfires and drought due to global warming increasingly pose significant health risks
+              to communities. Keeping with the theme we wanted to leverage NASA's resources to predict them. 
             </p>
             <p style={{ color: '#555' }}>
-              What started as a research collaboration has evolved into a comprehensive platform 
-              that transforms raw seismic data into intuitive, actionable visualizations.
+              Our team decided to focus on predictive visualization, giving probabilistic context to the weather patterns captured by 
+              NASA satellites.
             </p>
           </div>
 
@@ -189,23 +190,23 @@ const AboutPage = () => {
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
             border: '1px solid rgba(255, 255, 255, 0.2)'
           }}>
-            <h3 style={{ color: '#d32f2f', marginBottom: '1.5rem', fontSize: '1.5rem' }}>Our Values</h3>
+            <h3 style={{ color: '#d32f2f', marginBottom: '1.5rem', fontSize: '1.5rem' }}>What We Learned</h3>
             <ul style={{ color: '#555', paddingLeft: '1.2rem', listStyle: 'none' }}>
               <li style={{ marginBottom: '0.8rem', position: 'relative', paddingLeft: '1.5rem' }}>
                 <span style={{ position: 'absolute', left: 0, color: '#d32f2f', fontWeight: 'bold' }}>•</span>
-                <strong>Transparency:</strong> Open methodology and clear data sources
+                <strong>NASA Data Integration:</strong> Working with real satellite weather data at scale
               </li>
               <li style={{ marginBottom: '0.8rem', position: 'relative', paddingLeft: '1.5rem' }}>
                 <span style={{ position: 'absolute', left: 0, color: '#d32f2f', fontWeight: 'bold' }}>•</span>
-                <strong>Accessibility:</strong> Making complex data understandable for everyone
+                <strong>Machine Learning:</strong> Applying predictive models to climate and disaster data
               </li>
               <li style={{ marginBottom: '0.8rem', position: 'relative', paddingLeft: '1.5rem' }}>
                 <span style={{ position: 'absolute', left: 0, color: '#d32f2f', fontWeight: 'bold' }}>•</span>
-                <strong>Accuracy:</strong> Rigorous scientific standards in all our work
+                <strong>Data Visualization:</strong> Making complex scientific data accessible to the public
               </li>
               <li style={{ marginBottom: '0.8rem', position: 'relative', paddingLeft: '1.5rem' }}>
                 <span style={{ position: 'absolute', left: 0, color: '#d32f2f', fontWeight: 'bold' }}>•</span>
-                <strong>Impact:</strong> Helping communities become more resilient
+                <strong>Impact:</strong> Example of how technology can save lives
               </li>
             </ul>
           </div>
@@ -221,10 +222,7 @@ const AboutPage = () => {
           border: '1px solid rgba(255, 255, 255, 0.2)',
           textAlign: 'center'
         }}>
-          <h3 style={{ color: '#d32f2f', marginBottom: '1.5rem', fontSize: '2rem' }}>Get In Touch</h3>
-          <p style={{ color: '#555', marginBottom: '2rem', fontSize: '1.1rem' }}>
-            Have questions about our methodology? Interested in collaborating? We'd love to hear from you.
-          </p>
+          <h3 style={{ color: '#d32f2f', marginBottom: '1.5rem', fontSize: '2rem' }}>Our Code</h3>
           
           <div style={{
             display: 'flex',
@@ -238,9 +236,9 @@ const AboutPage = () => {
               borderRadius: '12px',
               border: '1px solid rgba(211, 47, 47, 0.2)'
             }}>
-              <strong style={{ color: '#d32f2f' }}>Email:</strong>
+              <strong style={{ color: '#d32f2f' }}>Demo:</strong>
               <br />
-              <span style={{ color: '#555' }}>contact@earthquakerisk.org</span>
+              <span style={{ color: '#555' }}>Coming soon...</span>
             </div>
             
             <div style={{
@@ -249,9 +247,9 @@ const AboutPage = () => {
               borderRadius: '12px',
               border: '1px solid rgba(211, 47, 47, 0.2)'
             }}>
-              <strong style={{ color: '#d32f2f' }}>GitHub:</strong>
+              <strong style={{ color: '#d32f2f' }}>Github:</strong>
               <br />
-              <span style={{ color: '#555' }}>github.com/earthquakerisk</span>
+              <span style={{ color: '#555' }}>https://github.com/adub3/nasa-zero-gravity</span>
             </div>
           </div>
         </div>

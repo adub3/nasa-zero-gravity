@@ -40,10 +40,7 @@ const NavigationBar = () => {
         display: 'flex',
         gap: '2rem'
       }}>
-        <Link to="/" style={linkStyle('/')}>
-          Map
-        </Link>
-        <Link to="/globe" style={linkStyle('/globe')}>
+        <Link to="/" style={linkStyle('/globe')}>
           Globe
         </Link>
         <Link to="/methods" style={linkStyle('/methods')}>
