@@ -1,0 +1,30 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@types/geojson": "^7946.0.14",
+    "@vis.gl/react-google-maps": "^1.5.5",
+    "lts": "^2.0.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^7.9.1"
+  },
+  "scripts": {
+    "start": "vite",
+    "start-local": "vite --config ../vite.config.local.js",
+    "build": "vite build"
+  },
+  "name": "heatmap",
+  "description": "This uses the `useMapsLibrary` hook showing earthquake magnitude data in a\r heatmap.",
+  "version": "1.0.0",
+  "main": "vite.config.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.6"
+  }
+}
