@@ -1,31 +1,22 @@
-from pathlib import Path
 import pandas as pd
 
-# Paths
-FOLDER = Path(r"nasa-zero-gravity\src\data\trainingdat\output_fullid")
-MERGED = FOLDER / "merged_eventtime_with_loc.LEFT_fullID_20250920-142002.csv"
-OUTPUT = FOLDER / "predictor_only_complete_filled.csv"
+# EDIT THIS ONE LINE ONLY (use relative or absolute — your call)
+CSV_IN  = r"src\data\trainingdat\output_fullid\mergeddata.csv"
+CSV_OUT = r"src\data\trainingdat\output_fullid\predictor_only_complete_filled.csv"
 
-# Load
-df = pd.read_csv(MERGED, low_memory=False)
+EXCLUDE_TYPES = {"earthquake"}  # case-insensitive
 
-# Mandatory predictor columns (must be present & non-null)
-mandatory_cols = [
-    "Disaster Type",
-    "Disaster Subtype",
-    "Latitude",
-    "Longitude",
-    "Start Year",
-    "Start Month",
-    "Start Day",
-    "End Year",
-    "End Month",
-    "End Day",
-    "Magnitude",
-    "Magnitude Scale",
+# load
+df = pd.read_csv(CSV_IN)
+
+# required columns
+mandatory = [
+    "Disaster Type","Disaster Subtype","Latitude","Longitude",
+    "Start Year","Start Month","Start Day","End Year","End Month","End Day",
+    "Magnitude","Magnitude Scale",
 ]
 
-# Optional severity columns (include if they exist, but may be blank)
+# optional severity columns (kept if present)
 severity_candidates = [
     "Total Damage, Adjusted ('000 US$)",
     "Total Damage ('000 US$)",
@@ -33,20 +24,23 @@ severity_candidates = [
     "No. Affected",
     "Total Deaths",
 ]
-optional_severity_cols = [c for c in severity_candidates if c in df.columns]
+optional = [c for c in severity_candidates if c in df.columns]
 
-# Check mandatory columns exist
-missing = [c for c in mandatory_cols if c not in df.columns]
-if missing:
-    raise KeyError(f"Missing mandatory columns: {missing}")
+# exclude earthquakes (case-insensitive)
+df["Disaster Type"] = df["Disaster Type"].astype(str)
+mask_keep_type = ~df["Disaster Type"].str.strip().str.casefold().isin(EXCLUDE_TYPES)
+df = df[mask_keep_type]
 
-# Filter rows where all mandatory predictors are present
-cols_to_keep = mandatory_cols + optional_severity_cols
-filtered = df.loc[df[mandatory_cols].notna().all(axis=1), cols_to_keep].copy()
+# keep only rows with all mandatory fields present
+filtered = df.loc[df[mandatory].notna().all(axis=1), mandatory + optional].copy()
 
-# Fill ALL remaining NaNs (including severity blanks) with 0
+# fill blanks with zeros
 filtered = filtered.fillna(0)
 
-# Save
-filtered.to_csv(OUTPUT, index=False)
-print(f"[DONE] wrote {OUTPUT} | rows={len(filtered):,} cols={len(filtered.columns):,}")
+# save
+filtered.to_csv(CSV_OUT, index=False)
+
+# distribution
+print("📊 disaster type distribution (after removing Earthquake):")
+print(filtered["Disaster Type"].value_counts())
+print(f"\n✅ wrote: {CSV_OUT} | rows={len(filtered):,}, cols={len(filtered.columns):,}")
