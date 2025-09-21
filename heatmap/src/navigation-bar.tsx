@@ -33,7 +33,7 @@ const NavigationBar = () => {
         color: '#333',
         textDecoration: 'none'
       }}>
-        Earthquake Risk Map
+        Natural Disaster Risk Map
       </Link>
       
       <div style={{
@@ -42,6 +42,9 @@ const NavigationBar = () => {
       }}>
         <Link to="/" style={linkStyle('/')}>
           Map
+        </Link>
+        <Link to="/globe" style={linkStyle('/globe')}>
+          Globe
         </Link>
         <Link to="/methods" style={linkStyle('/methods')}>
           Methods

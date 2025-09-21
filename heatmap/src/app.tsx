@@ -8,6 +8,7 @@ import HeatmapKey from './heatmap-key';
 import Heatmap from './heatmap';
 import MethodsPage from './methods';
 import AboutPage from './about';
+import GlobePage from './globe';
 import {EarthquakesGeojson, loadEarthquakeGeojson} from './earthquakes';
 
 const API_KEY =
@@ -55,6 +56,7 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<MapPage />} />
+        <Route path="/globe" element={<GlobePage />} />
         <Route path="/methods" element={<MethodsPage />} />
         <Route path="/about" element={<AboutPage />} />
       </Routes>
@@ -63,13 +65,3 @@ const App = () => {
 };
 
 export default App;
-
-// Add this to the end of your app.tsx
-export const renderToDom = (container: HTMLElement) => {
-  const root = ReactDOM.createRoot(container);
-  root.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  );
-};

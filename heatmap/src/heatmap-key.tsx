@@ -21,7 +21,7 @@ const HeatmapKey = () => {
         fontWeight: '600',
         color: '#333'
       }}>
-        Earthquake Risk
+        Wildfire Risk
       </h4>
       
       <div style={{
@@ -54,7 +54,7 @@ const HeatmapKey = () => {
         color: '#888',
         lineHeight: '1.4'
       }}>
-        Risk levels based on earthquake magnitude and frequency data
+        Risk levels based on wildfire severity and frequency data
       </div>
     </div>
   );
