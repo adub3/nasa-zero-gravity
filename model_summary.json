@@ -1,0 +1,21 @@
+{
+  "training_info": {
+    "successful_rows": 10,
+    "failed_rows": 0,
+    "base_channels": 32,
+    "dropout": 0.15
+  },
+  "categories": {
+    "disaster_types": [],
+    "disaster_subtypes": []
+  },
+  "architecture": {
+    "input_channels": 46,
+    "first_layer_out": 32,
+    "n_disaster_types": 3,
+    "n_disaster_subtypes": 9,
+    "total_layers": 114,
+    "total_parameters": 5514139
+  },
+  "training_config": {}
+}
