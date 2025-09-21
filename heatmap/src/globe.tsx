@@ -14,6 +14,7 @@ export type DisasterRiskGeojson = FeatureCollection<Point, DisasterRiskProps>;
 const API_KEY = globalThis.GOOGLE_MAPS_API_KEY ?? (process.env.GOOGLE_MAPS_API_KEY as string);
 
 // Generate grid-based risk data around specific hotspots
+// Simulated data copied directly from Claude
 const generateRiskGrid = (
   centerLat: number,
   centerLng: number,
@@ -122,11 +123,11 @@ const generateWildfireData = (): DisasterRiskGeojson => {
     { lat: 43.0, lng: 5.6, risk: 0.6 },
   ];
 
-  // Combine all points and add some variation
+  // Combine all points and add some variation (Claude)
   const allPoints = [...californiaPoints, ...pacificNWPoints, ...southwestPoints, ...australiaPoints, ...mediterraneanPoints];
   
   allPoints.forEach((point, index) => {
-    // Add some nearby points with variation
+    // Add some nearby points with variation (Claude)
     for (let i = 0; i < 8; i++) {
       const latOffset = (Math.random() - 0.5) * 0.3; // ±0.15 degrees
       const lngOffset = (Math.random() - 0.5) * 0.3;
@@ -323,13 +324,13 @@ const loadGoogleMaps = () => {
   });
 };
 
-// Helper function to get color based on probability (0-1)
+// helper function to get color based on probability (0-1)
 const getProbabilityColor = (probability: number, disasterType: string): string => {
   // Clamp probability to 0-1 range
   const p = Math.max(0, Math.min(1, probability));
   
   if (disasterType === 'wildfire') {
-    // Red gradient for wildfires
+    // Red gradien for wildfires
     if (p >= 0.8) return '#8B0000'; // Dark red
     if (p >= 0.6) return '#FF0000'; // Red
     if (p >= 0.4) return '#FF4500'; // Orange-red
@@ -344,7 +345,7 @@ const getProbabilityColor = (probability: number, disasterType: string): string 
     return '#F5DEB3'; // Wheat
   }
   
-  return '#808080'; // Gray fallback
+  return '#808080'; // Gray in case of error
 };
 
 // Custom 3D Map component
@@ -667,6 +668,7 @@ const DisasterKey: React.FC<{ disasterType: string }> = ({ disasterType }) => {
   );
 };
 
+//Page structure and effects
 const GlobePage = () => {
   const [disasterData, setDisasterData] = useState<DisasterRiskGeojson>();
   const [use3D, setUse3D] = useState(true);

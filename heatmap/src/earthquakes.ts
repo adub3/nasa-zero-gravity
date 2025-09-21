@@ -1,3 +1,4 @@
+//Claude (Generating data for our UI display and demo)
 import {FeatureCollection, Point} from 'geojson';
 
 export type EarthquakeProps = {
